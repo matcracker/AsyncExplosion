@@ -1,0 +1,12 @@
+name: AsyncExplosion
+main: matcracker\AsyncExplosion\Main
+version: 0.1.0
+api: [3.4.0]
+mcpe-protcol:
+  - 354
+  - 361
+
+load: POSTWORLD
+author: matcracker
+description: ""
+website: https://github.com/matcracker/AsyncExplosion
