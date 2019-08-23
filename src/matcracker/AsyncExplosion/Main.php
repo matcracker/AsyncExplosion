@@ -105,18 +105,6 @@ final class AsyncChunkSet extends AsyncTask{
 			$chunks = $this->getResult();
 			foreach($chunks as $chunk){
 				$world->setChunk($chunk->getX(), $chunk->getZ(), $chunk, false);
-				$tiles = $world->getChunkTiles($chunk->getX(), $chunk->getZ());
-				foreach($tiles as $tile){
-					if($tile instanceof Tile){
-						if($tile instanceof Chest){
-							$tile->unpair();
-						}
-						if($tile instanceof Container){
-							$tile->getInventory()->dropContents($world, $tile->add(0.5, 0.5, 0.5));
-						}
-
-						$tile->close();
-					}
 				}
 			}
 
@@ -131,10 +119,11 @@ final class AsyncChunkSet extends AsyncTask{
 	 */
 	private static function getSerializedChunks(array $vectors, int $worldId) : array{
 		$touchedChunks = [];
+    $world = Server::getInstance()->getLevel($worldId);
 		foreach($vectors as $block){
 			$x = $block->getX() >> 4;
 			$z = $block->getZ() >> 4;
-			$chunk = Server::getInstance()->getLevel($worldId)->getChunk($x, $z);
+			$chunk = $world->getChunk($x, $z);
 			if($chunk === null){
 				continue;
 			}
