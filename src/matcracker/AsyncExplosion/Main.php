@@ -29,9 +29,6 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
-use pocketmine\tile\Chest;
-use pocketmine\tile\Container;
-use pocketmine\tile\Tile;
 
 final class Main extends PluginBase implements Listener{
 
@@ -46,14 +43,13 @@ final class Main extends PluginBase implements Listener{
 
 	public function onExplode(EntityExplodeEvent $event) : void{
 		$blockList = $event->getBlockList();
-		//$chunks = $this->getSerializedChunks($blockList);
 		/**@var Vector3[] $vectors */
 		$vectors = array_map(static function(Block $block) : Vector3{
 			return $block->asVector3()->floor();
 		}, $blockList);
 
 		$this->queueTask->addInQueue($vectors, $event->getPosition()->getLevel()->getId());
-		$event->setBlockList(array_filter($blockList, static function(Block $block) : bool{
+		$event->setBlockList(array_filter($blockList, static function(Block $block) : bool{//Allow ignites of other TNTs
 			return $block->getId() === BlockIds::TNT;
 		}));
 	}
@@ -105,9 +101,7 @@ final class AsyncChunkSet extends AsyncTask{
 			$chunks = $this->getResult();
 			foreach($chunks as $chunk){
 				$world->setChunk($chunk->getX(), $chunk->getZ(), $chunk, false);
-				}
 			}
-
 		}
 	}
 
@@ -119,7 +113,7 @@ final class AsyncChunkSet extends AsyncTask{
 	 */
 	private static function getSerializedChunks(array $vectors, int $worldId) : array{
 		$touchedChunks = [];
-    $world = Server::getInstance()->getLevel($worldId);
+		$world = Server::getInstance()->getLevel($worldId);
 		foreach($vectors as $block){
 			$x = $block->getX() >> 4;
 			$z = $block->getZ() >> 4;
@@ -142,17 +136,15 @@ final class QueueTask extends Task{
 		if(!isset($this->queue[$worldId])){
 			$this->initQueue($worldId);
 		}
-		//$this->queue[$worldId]["chunks"] = array_merge($this->queue[$worldId]["chunks"], $chunks);
+
 		$this->queue[$worldId]["vectors"] = array_merge($this->queue[$worldId]["vectors"], $vectors);
 	}
 
 	private function initQueue(int $worldId) : void{
-		//$this->queue[$worldId]["chunks"] = [];
 		$this->queue[$worldId]["vectors"] = [];
 	}
 
 	public function onRun(int $currentTick) : void{
-
 		/**@var int $worldId */
 		foreach($this->queue as $worldId => $data){
 			Server::getInstance()->getAsyncPool()->submitTask(new AsyncChunkSet($this->queue[$worldId]["vectors"], $worldId));
