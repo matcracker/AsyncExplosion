@@ -8,5 +8,5 @@ mcpe-protcol:
 
 load: POSTWORLD
 author: matcracker
-description: ""
+description: "A plugin that performs asynchronous explosions."
 website: https://github.com/matcracker/AsyncExplosion
